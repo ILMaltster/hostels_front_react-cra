@@ -16,8 +16,10 @@ export const useEditHostel = (onEditError: () => void, onSuccess: () => void) =>
             queryClient.invalidateQueries({ queryKey: ['getHostels']});
             onSuccess();
         },
-        onError: (err)=> {
+        onError: (err, variables)=> {
             onEditError();
+            console.log(variables);
+
             throw err;
         }
 

@@ -76,10 +76,11 @@ export const Tables: FC = () => {
     const [showAddForm, setShowAddForm] = useState<boolean>(false);
     const theme = useTheme()
 
-    const {data, isPending, error} = useGetHostels({limit: paginationModel.pageSize, offset: paginationModel.pageSize * paginationModel.page});
+    const {data, isPending, error, refetch} = useGetHostels({limit: paginationModel.pageSize, offset: paginationModel.pageSize * paginationModel.page});
     
-    const onEditError = () =>  setSnackbar({ children: 'Не удалось изменить строку', severity: 'error' });
+    const onEditError = () =>  {setSnackbar({ children: 'Не удалось изменить строку', severity: 'error' }); refetch()};
     const onSuccesEdit = () =>  setSnackbar({ children: 'Строка успешно изменилась', severity: 'success' });
+    const {mutate: editHostel, ...editInfo} = useEditHostel(onEditError, onSuccesEdit);
 
     const {mutate: deleteHostel} = useDeleteHostel()
     const {mutate: addHostel} = useAddHostel();
@@ -102,18 +103,9 @@ export const Tables: FC = () => {
         setPageNumber(model);
     }
 
-    const processRowUpdate = async (updatedRow: IHostel, originalRow: IHostel): Promise<IHostel> => {
-        const {mutate: editHostel, ...editInfo} = useEditHostel(onEditError, onSuccesEdit);
-
-        await editHostel({body: updatedRow, tin: originalRow.tin});
-        
-        await new Promise((resolve) => setTimeout(() => resolve(null), 3000))
-        // Если editHostel падает, то в editInfo.isError узнаем об ошибке. Но тут оно не обновляется так как функция используется как callback и информация о внешних переменных не доступна. Как решить эту проблему? Ответь на русском.
-        if(editInfo.isError) {
-            return originalRow;
-        }
-        setSnackbar({ children: 'Строка изменена', severity: 'success' });
-        return updatedRow
+    const processRowUpdate = (updatedRow: IHostel, originalRow: IHostel) => {
+        editHostel({body: updatedRow, tin: originalRow.tin});
+        return updatedRow;
     };
 
     const deleteHandlet = (row: IHostel) => {
