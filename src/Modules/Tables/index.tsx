@@ -1,16 +1,15 @@
 import { FC, FormEventHandler, MouseEventHandler, useCallback, useEffect, useRef, useState } from "react"
-import { DataGrid, GridActionsCellItem, GridCellEditStopParams, GridColDef, GridPaginationModel, MuiEvent } from '@mui/x-data-grid';
+import { DataGrid, GridActionsCellItem, GridCallbackDetails, GridCellEditStopParams, GridColDef, GridPaginationModel, GridSortModel, MuiEvent } from '@mui/x-data-grid';
 import { IHostel } from "./Models/hostels";
 import { useGetHostels } from "./Utils/Queries/getHostels";
 import { PAGE_LIMITS, PAGE_LIMIT_DEFAULT } from "Common/Consts";
 import { GridInitialStateCommunity } from "@mui/x-data-grid/models/gridStateCommunity";
-import { Alert, AlertProps, Box, Button, CircularProgress, Snackbar, TextField, Typography, useTheme } from "@mui/material";
+import { Alert, AlertProps, Box, Button, CircularProgress, FormControl, InputLabel, MenuItem, Select, Snackbar, TextField, Typography, useTheme } from "@mui/material";
 import { useForm } from "react-hook-form";
 import { useAddHostel } from "./Utils/Queries/addHostel";
 import DeleteIcon from '@mui/icons-material/DeleteOutlined';
 import { useDeleteHostel } from "./Utils/Queries/deleteHostel";
 import { useEditHostel } from "./Utils/Queries/editHostel";
-import { resolve } from "path";
 
 
 const getDataGridColumns = (handleDeleteClick:any): GridColDef<IHostel>[] => [
@@ -19,28 +18,28 @@ const getDataGridColumns = (handleDeleteClick:any): GridColDef<IHostel>[] => [
         headerName: 'id',   
         type: 'number',
         width: 80,
-        sortable: false,
+        sortable: true,
     },
     { 
         field: 'name',
         headerName: 'name',    
         editable: true,
         flex: 0.3,
-        sortable: false,
+        sortable: true,
     },
     { 
         field: 'tin',
         headerName: 'tin',   
         editable: true,
         flex: 0.3,
-        sortable: false,
+        sortable: true,
     },
     { 
         field: 'address',
         headerName: 'address',  
         editable: true,
         flex: 0.3,
-        sortable: false,
+        sortable: true,
     },
     { 
         field: 'actions',
@@ -76,43 +75,50 @@ export const Tables: FC = () => {
     const [showAddForm, setShowAddForm] = useState<boolean>(false);
     const theme = useTheme()
 
-    const {data, isPending, error, refetch} = useGetHostels({limit: paginationModel.pageSize, offset: paginationModel.pageSize * paginationModel.page});
+    const [forManualUpdateQuery, setForManualUpdateQuery] = useState<boolean>(true);
+    let {data, isPending, error } = useGetHostels({limit: paginationModel.pageSize, offset: paginationModel.pageSize * paginationModel.page, forManualUpdateQuery});
     
-    const onEditError = () =>  {setSnackbar({ children: 'Не удалось изменить строку', severity: 'error' }); refetch()};
-    const onSuccesEdit = () =>  setSnackbar({ children: 'Строка успешно изменилась', severity: 'success' });
-    const {mutate: editHostel, ...editInfo} = useEditHostel(onEditError, onSuccesEdit);
-
-    const {mutate: deleteHostel} = useDeleteHostel()
+    const onEditError = async () => { setSnackbar({ children: 'Не удалось изменить строку', severity: 'error' }); setForManualUpdateQuery((v)=>!v);};
+    const onSuccesEdit = () => setSnackbar({ children: 'Строка успешно изменилась', severity: 'success' });
+    
+    const {mutate: editHostel} = useEditHostel(onEditError, onSuccesEdit);
+    const {mutate: deleteHostel} = useDeleteHostel();
     const {mutate: addHostel} = useAddHostel();
 
     const { register, handleSubmit } = useForm<Omit<IHostel, "id">>()
 
+    // -- snackbar --
     const [snackbar, setSnackbar] = useState<Pick<
         AlertProps,
         'children' | 'severity'
     > | null>(null);
 
-  const handleCloseSnackbar = () => setSnackbar(null);
+     const handleCloseSnackbar = () => setSnackbar(null);
+    // -- snackbar --
 
     const onSubmit: FormEventHandler<HTMLFormElement> = (e) => {
         e.preventDefault();
         handleSubmit((body) => addHostel(body))();
-    } 
+    }; 
 
     const onPaginationModelChange = (model: GridPaginationModel) => {
         setPageNumber(model);
-    }
+    };
 
     const processRowUpdate = (updatedRow: IHostel, originalRow: IHostel) => {
         editHostel({body: updatedRow, tin: originalRow.tin});
         return updatedRow;
     };
 
-    const deleteHandlet = (row: IHostel) => {
+    const deleteHandler = (row: IHostel) => {
         deleteHostel(row.tin);
+    };
+
+    const onSortModelChange = (model: GridSortModel, details: GridCallbackDetails) => {
+        console.log(model, details);
     }
 
-    const columns = getDataGridColumns(deleteHandlet);
+    const columns = getDataGridColumns(deleteHandler);
 
     return (
         <>
@@ -136,6 +142,24 @@ export const Tables: FC = () => {
             <Button variant={'text'} onClick={() => setShowAddForm((prev) => !prev)}  sx={{marginTop: theme.spacing(2)}}>
                     { (showAddForm ? 'Скрыть' : 'Показать') + ' форму добавления'}
             </Button>
+            {/* <div>
+                <FormControl>
+                    <InputLabel id="filterFieldSelectLabel">Age</InputLabel>
+                    <Select
+                        labelId="filterFieldSelectLabel"
+                        id="filterFieldSelect"
+                        value={columns.fiel}
+                        label="Age"
+                        onChange={handleChange}
+                    >
+                        {
+                            columns.map(({field})=> (
+                                <MenuItem value={field}>field</MenuItem>
+                            ))
+                        }
+                    </Select>
+                </FormControl>
+            </div> */}
             <div style={{height: "400px", marginTop: theme.spacing(2)}}>
                 {
                     data ? 
@@ -148,6 +172,8 @@ export const Tables: FC = () => {
                         initialState={tableInitialState}  
                         onPaginationModelChange={onPaginationModelChange}
                         processRowUpdate={processRowUpdate}
+                        sortingMode="server"
+                        onSortModelChange={onSortModelChange}
                         paginationModel={paginationModel}
                     />
                     :
