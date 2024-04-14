@@ -14,6 +14,6 @@ export const useGetHostels = ({limit, offset, order, forManualUpdateQuery}: IGet
     return useQuery<IPaginationModel<IHostel>>({
         queryKey: ['getHostels', limit, offset, forManualUpdateQuery, order],
         queryFn: () => 
-        Api.Get(`/hostels?limit=${limit}&offset=${offset}${order && `&orderField=${order.field}&orderType=${order.type}`}`)
+        Api.Get(`/hostels?limit=${limit}&offset=${offset}${!!order ? `&orderField=${order.field}&orderType=${order.type}` : ""}`)
     })
 }
