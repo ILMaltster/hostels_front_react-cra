@@ -10,6 +10,7 @@ import { useAddHostel } from "./Utils/Queries/addHostel";
 import DeleteIcon from '@mui/icons-material/DeleteOutlined';
 import { useDeleteHostel } from "./Utils/Queries/deleteHostel";
 import { useEditHostel } from "./Utils/Queries/editHostel";
+import { IOrder } from "Common/Models";
 
 
 const getDataGridColumns = (handleDeleteClick:any): GridColDef<IHostel>[] => [
@@ -68,15 +69,26 @@ const tableInitialState: GridInitialStateCommunity = {
     }
 }
 
+const parseGridSortModel = ([model]: GridSortModel): IOrder | undefined => {
+    if(model && (model.sort === 'asc' || model.sort === 'desc'))
+        return {field: model.field, type: model.sort}
+    else return undefined;
+}
 
 export const Tables: FC = () => {
     const [paginationModel, setPageNumber] = useState<GridPaginationModel>({page: 0, pageSize: PAGE_LIMIT_DEFAULT});
+    const [orderModel, setOrderModel] = useState<GridSortModel>([])
 
     const [showAddForm, setShowAddForm] = useState<boolean>(false);
     const theme = useTheme()
 
     const [forManualUpdateQuery, setForManualUpdateQuery] = useState<boolean>(true);
-    let {data, isPending, error } = useGetHostels({limit: paginationModel.pageSize, offset: paginationModel.pageSize * paginationModel.page, forManualUpdateQuery});
+    let { data } = useGetHostels({
+        limit: paginationModel.pageSize, 
+        offset: paginationModel.pageSize * paginationModel.page, 
+        order: parseGridSortModel(orderModel),
+        forManualUpdateQuery
+    });
     
     const onEditError = async () => { setSnackbar({ children: 'Не удалось изменить строку', severity: 'error' }); setForManualUpdateQuery((v)=>!v);};
     const onSuccesEdit = () => setSnackbar({ children: 'Строка успешно изменилась', severity: 'success' });
@@ -87,14 +99,12 @@ export const Tables: FC = () => {
 
     const { register, handleSubmit } = useForm<Omit<IHostel, "id">>()
 
-    // -- snackbar --
     const [snackbar, setSnackbar] = useState<Pick<
         AlertProps,
         'children' | 'severity'
     > | null>(null);
 
      const handleCloseSnackbar = () => setSnackbar(null);
-    // -- snackbar --
 
     const onSubmit: FormEventHandler<HTMLFormElement> = (e) => {
         e.preventDefault();
@@ -114,8 +124,8 @@ export const Tables: FC = () => {
         deleteHostel(row.tin);
     };
 
-    const onSortModelChange = (model: GridSortModel, details: GridCallbackDetails) => {
-        console.log(model, details);
+    const onSortModelChange = (model: GridSortModel) => {
+        setOrderModel(model);
     }
 
     const columns = getDataGridColumns(deleteHandler);
@@ -174,6 +184,7 @@ export const Tables: FC = () => {
                         processRowUpdate={processRowUpdate}
                         sortingMode="server"
                         onSortModelChange={onSortModelChange}
+                        sortModel={orderModel}
                         paginationModel={paginationModel}
                     />
                     :
