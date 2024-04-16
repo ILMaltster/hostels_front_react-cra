@@ -4,13 +4,13 @@ import { IHostel } from "./Models/hostels";
 import { useGetHostels } from "./Utils/Queries/getHostels";
 import { PAGE_LIMITS, PAGE_LIMIT_DEFAULT } from "Common/Consts";
 import { GridInitialStateCommunity } from "@mui/x-data-grid/models/gridStateCommunity";
-import { Alert, AlertProps, Box, Button, CircularProgress, FormControl, InputLabel, MenuItem, Select, Snackbar, TextField, Typography, useTheme } from "@mui/material";
+import { Alert, AlertProps, Box, Button, CircularProgress, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent, Snackbar, TextField, Typography, useTheme } from "@mui/material";
 import { useForm } from "react-hook-form";
 import { useAddHostel } from "./Utils/Queries/addHostel";
 import DeleteIcon from '@mui/icons-material/DeleteOutlined';
 import { useDeleteHostel } from "./Utils/Queries/deleteHostel";
 import { useEditHostel } from "./Utils/Queries/editHostel";
-import { IOrder } from "Common/Models";
+import { IOrder, ISearch } from "Common/Models";
 
 
 const getDataGridColumns = (handleDeleteClick:any): GridColDef<IHostel>[] => [
@@ -69,15 +69,21 @@ const tableInitialState: GridInitialStateCommunity = {
     }
 }
 
-const parseGridSortModel = ([model]: GridSortModel): IOrder | undefined => {
+function parseGridSortModel([model]: GridSortModel): IOrder | undefined {
     if(model && (model.sort === 'asc' || model.sort === 'desc'))
         return {field: model.field, type: model.sort}
     else return undefined;
 }
 
+function OmitActionFromLiteral<T extends Record<string | symbol, any>>(object: GridColDef<T>[]): (keyof T)[] {
+    // @ts-ignore
+    return object.reduce<keyof T>((acc, curr) => curr.field !== 'actions' ? [...acc, curr.field] : acc, []);
+}
+
 export const Tables: FC = () => {
     const [paginationModel, setPageNumber] = useState<GridPaginationModel>({page: 0, pageSize: PAGE_LIMIT_DEFAULT});
-    const [orderModel, setOrderModel] = useState<GridSortModel>([])
+    const [orderModel, setOrderModel] = useState<GridSortModel>([]);
+    const [searchModel, setSearchModel] = useState<ISearch<keyof IHostel>>({field: "id", value: ""});
 
     const [showAddForm, setShowAddForm] = useState<boolean>(false);
     const theme = useTheme()
@@ -130,6 +136,13 @@ export const Tables: FC = () => {
 
     const columns = getDataGridColumns(deleteHandler);
 
+    const onChangeSearchSelect = (event: SelectChangeEvent<keyof IHostel>) => {
+        const field = event.target.value as keyof IHostel;
+        setSearchModel(prev => ({...prev, field}))
+    }
+
+    const columnsWithoutAction =  OmitActionFromLiteral<IHostel>(columns);
+
     return (
         <>
             <Typography variant="h2">
@@ -170,6 +183,28 @@ export const Tables: FC = () => {
                     </Select>
                 </FormControl>
             </div> */}
+            <Box sx={{marginTop: 2}}>
+                <FormControl sx={{flexDirection: "row", alignItems: 'center', gap: 2}}>
+                    <TextField id="table-search" label="Поиск" size="small" type="search" />
+                    по
+                    <FormControl>
+                        <InputLabel id="searchFieldSelect">Поле</InputLabel>
+                        <Select<keyof IHostel>
+                            id="searchFieldSelect"
+                            value={searchModel.field}
+                            label="Поле"
+                            size="small"
+                            onChange={onChangeSearchSelect}
+                        >
+                            {
+                                columnsWithoutAction.map((field)=> (
+                                    <MenuItem value={field}>{field}</MenuItem>
+                                ))
+                            }
+                        </Select>
+                    </FormControl>
+                </FormControl>
+            </Box>
             <div style={{height: "400px", marginTop: theme.spacing(2)}}>
                 {
                     data ? 
