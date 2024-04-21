@@ -13,3 +13,9 @@ export interface ISearch<T extends string = any>{
     value: string;
     field: T;
 }
+
+export interface IFilter<T = any> {
+    field: T;
+    operator: any;
+    value?: string | number;
+}

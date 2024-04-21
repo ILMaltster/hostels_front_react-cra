@@ -1,5 +1,5 @@
 import { FC, FormEventHandler, MouseEventHandler, useCallback, useEffect, useRef, useState } from "react"
-import { DataGrid, GridActionsCellItem, GridCallbackDetails, GridCellEditStopParams, GridColDef, GridPaginationModel, GridSortModel, MuiEvent } from '@mui/x-data-grid';
+import { DataGrid, GridActionsCellItem, GridCallbackDetails, GridCellEditStopParams, GridColDef, GridFilterModel, GridPaginationModel, GridSortModel, MuiEvent } from '@mui/x-data-grid';
 import { IHostel } from "./Models/hostels";
 import { useGetHostels } from "./Utils/Queries/getHostels";
 import { PAGE_LIMITS, PAGE_LIMIT_DEFAULT } from "Common/Consts";
@@ -10,7 +10,7 @@ import { useAddHostel } from "./Utils/Queries/addHostel";
 import DeleteIcon from '@mui/icons-material/DeleteOutlined';
 import { useDeleteHostel } from "./Utils/Queries/deleteHostel";
 import { useEditHostel } from "./Utils/Queries/editHostel";
-import { IOrder, ISearch } from "Common/Models";
+import { IFilter, IOrder, ISearch } from "Common/Models";
 
 
 const getDataGridColumns = (handleDeleteClick:any): GridColDef<IHostel>[] => [
@@ -84,15 +84,18 @@ export const Tables: FC = () => {
     const [paginationModel, setPageNumber] = useState<GridPaginationModel>({page: 0, pageSize: PAGE_LIMIT_DEFAULT});
     const [orderModel, setOrderModel] = useState<GridSortModel>([]);
     const [searchModel, setSearchModel] = useState<ISearch<keyof IHostel>>({field: "id", value: ""});
+    const [filterModel, setFilterModel] = useState<IFilter<keyof IHostel> | undefined>(undefined);
 
     const [showAddForm, setShowAddForm] = useState<boolean>(false);
     const theme = useTheme()
 
     const [forManualUpdateQuery, setForManualUpdateQuery] = useState<boolean>(true);
-    let { data } = useGetHostels({
+    let { data, isLoading: isGetHostelsLoading } = useGetHostels({
         limit: paginationModel.pageSize, 
         offset: paginationModel.pageSize * paginationModel.page, 
         order: parseGridSortModel(orderModel),
+        search: searchModel,
+        filter: filterModel,
         forManualUpdateQuery
     });
     
@@ -141,6 +144,22 @@ export const Tables: FC = () => {
         setSearchModel(prev => ({...prev, field}))
     }
 
+    const onChangeSearchText = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setSearchModel(prev => ({...prev, value: event.target.value}))
+    }
+
+    const onFilterChange = (model: GridFilterModel, details: GridCallbackDetails<"filter">) => {
+        console.log(model, details);
+        if (details.reason){
+            const filter = model.items[0];
+            const operator = filter.operator;
+            const value = filter.value;
+            const field = filter.field as keyof IHostel;
+
+            setFilterModel({field, operator, value})
+        }
+    }
+
     const columnsWithoutAction =  OmitActionFromLiteral<IHostel>(columns);
 
     return (
@@ -185,7 +204,7 @@ export const Tables: FC = () => {
             </div> */}
             <Box sx={{marginTop: 2}}>
                 <FormControl sx={{flexDirection: "row", alignItems: 'center', gap: 2}}>
-                    <TextField id="table-search" label="Поиск" size="small" type="search" />
+                    <TextField id="table-search" label="Поиск" onChange={onChangeSearchText} size="small" type="search" />
                     по
                     <FormControl>
                         <InputLabel id="searchFieldSelect">Поле</InputLabel>
@@ -206,27 +225,23 @@ export const Tables: FC = () => {
                 </FormControl>
             </Box>
             <div style={{height: "400px", marginTop: theme.spacing(2)}}>
-                {
-                    data ? 
-                    <DataGrid 
-                        columns={columns} 
-                        rows={data?.rows || []} 
-                        rowCount={data?.count-1}
-                        paginationMode="server"
-                        pageSizeOptions={PAGE_LIMITS} 
-                        initialState={tableInitialState}  
-                        onPaginationModelChange={onPaginationModelChange}
-                        processRowUpdate={processRowUpdate}
-                        sortingMode="server"
-                        onSortModelChange={onSortModelChange}
-                        sortModel={orderModel}
-                        paginationModel={paginationModel}
-                    />
-                    :
-                    <Box sx={{display: 'flex', justifyContent: 'center'}}>
-                        <CircularProgress/>
-                    </Box>
-                }
+                <DataGrid 
+                    loading={!data && isGetHostelsLoading}
+                    columns={columns} 
+                    rows={data?.rows || []} 
+                    rowCount={data ? data?.count-1 : 0}
+                    paginationMode="server"
+                    pageSizeOptions={PAGE_LIMITS} 
+                    initialState={tableInitialState}  
+                    onPaginationModelChange={onPaginationModelChange}
+                    processRowUpdate={processRowUpdate}
+                    sortingMode="server"
+                    onSortModelChange={onSortModelChange}
+                    sortModel={orderModel}
+                    paginationModel={paginationModel}
+                    filterMode="server"
+                    onFilterModelChange={onFilterChange}
+                />
             </div>
             {!!snackbar && 
             <Snackbar
