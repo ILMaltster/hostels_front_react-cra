@@ -14,8 +14,13 @@ export interface ISearch<T extends string = any>{
     field: T;
 }
 
+type TGenericOperatorMark = 'isEmpty' | 'isNotEmpty' | 'isAnyOf'
+export type TIntegerOperatorMark = '>' | '<' | '=' | '!=' | '>=' | '<=' | TGenericOperatorMark;
+export type TStringOperatorMark = 'contains' | 'equals' | 'startsWith' | 'endWith' | TGenericOperatorMark;
+export type IOperatorMark = TIntegerOperatorMark | TStringOperatorMark;
+
 export interface IFilter<T = any> {
     field: T;
-    operator: any;
-    value?: string | number;
+    operator: IOperatorMark;
+    value?: string | number | Array<string>;
 }

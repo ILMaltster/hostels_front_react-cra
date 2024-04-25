@@ -27,7 +27,7 @@ export const useGetHostels = ({limit, offset, order, search, filter, forManualUp
             `limit=${limit}&offset=${offset}` +
             `${!!order ? `&orderField=${order.field}&orderType=${order.type}` : ""}` +
             `${!!search?.value ? `&searchField=${search.field}&searchValue=${search.value}` : ""}` +
-            `${!!filter?.value ? `&filterField=${filter.field}&filterOperator=${filter.operator}&filterValue=${filter.value}` : ""}`
+            `${!!filter?.field ? `&filterField=${filter.field}&filterOperator=${filter.operator}&filterValue=${filter.value}` : ""}`
         )
     })
 }

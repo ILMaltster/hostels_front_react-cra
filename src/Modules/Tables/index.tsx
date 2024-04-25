@@ -10,7 +10,7 @@ import { useAddHostel } from "./Utils/Queries/addHostel";
 import DeleteIcon from '@mui/icons-material/DeleteOutlined';
 import { useDeleteHostel } from "./Utils/Queries/deleteHostel";
 import { useEditHostel } from "./Utils/Queries/editHostel";
-import { IFilter, IOrder, ISearch } from "Common/Models";
+import { IFilter, IOperatorMark, IOrder, ISearch } from "Common/Models";
 
 
 const getDataGridColumns = (handleDeleteClick:any): GridColDef<IHostel>[] => [
@@ -79,6 +79,8 @@ function OmitActionFromLiteral<T extends Record<string | symbol, any>>(object: G
     // @ts-ignore
     return object.reduce<keyof T>((acc, curr) => curr.field !== 'actions' ? [...acc, curr.field] : acc, []);
 }
+
+const notNeedValueOperators: Array<IOperatorMark> = ['isNotEmpty', 'isEmpty'];
 
 export const Tables: FC = () => {
     const [paginationModel, setPageNumber] = useState<GridPaginationModel>({page: 0, pageSize: PAGE_LIMIT_DEFAULT});
@@ -150,13 +152,22 @@ export const Tables: FC = () => {
 
     const onFilterChange = (model: GridFilterModel, details: GridCallbackDetails<"filter">) => {
         console.log(model, details);
-        if (details.reason){
+        if (details.reason && details.reason !== 'deleteFilterItem'){
             const filter = model.items[0];
-            const operator = filter.operator;
-            const value = filter.value;
+            const operator = filter.operator as IOperatorMark;
+            const value = filter.value as string || [];
             const field = filter.field as keyof IHostel;
 
+            console.log((value === '' || value.length === 0 || !value), value);
+
+            if(!notNeedValueOperators.some((currOper) => currOper === operator) && (value === '' || value.length === 0 || !value)){
+                setFilterModel(undefined)
+            }
+
             setFilterModel({field, operator, value})
+        }
+        else if (details.reason === 'deleteFilterItem') {
+            setFilterModel(undefined)
         }
     }
 
@@ -184,24 +195,6 @@ export const Tables: FC = () => {
             <Button variant={'text'} onClick={() => setShowAddForm((prev) => !prev)}  sx={{marginTop: theme.spacing(2)}}>
                     { (showAddForm ? 'Скрыть' : 'Показать') + ' форму добавления'}
             </Button>
-            {/* <div>
-                <FormControl>
-                    <InputLabel id="filterFieldSelectLabel">Age</InputLabel>
-                    <Select
-                        labelId="filterFieldSelectLabel"
-                        id="filterFieldSelect"
-                        value={columns.fiel}
-                        label="Age"
-                        onChange={handleChange}
-                    >
-                        {
-                            columns.map(({field})=> (
-                                <MenuItem value={field}>field</MenuItem>
-                            ))
-                        }
-                    </Select>
-                </FormControl>
-            </div> */}
             <Box sx={{marginTop: 2}}>
                 <FormControl sx={{flexDirection: "row", alignItems: 'center', gap: 2}}>
                     <TextField id="table-search" label="Поиск" onChange={onChangeSearchText} size="small" type="search" />
