@@ -1,4 +1,4 @@
-export interface IPaginationModel<T>{
+export interface IPaginationModel<T = any>{
     rows: T[];
     count: number;
     limit: number;

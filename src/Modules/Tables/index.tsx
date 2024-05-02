@@ -11,6 +11,7 @@ import DeleteIcon from '@mui/icons-material/DeleteOutlined';
 import { useDeleteHostel } from "./Utils/Queries/deleteHostel";
 import { useEditHostel } from "./Utils/Queries/editHostel";
 import { IFilter, IOperatorMark, IOrder, ISearch } from "Common/Models";
+import { TablePage } from "./Components/TablePage";
 
 
 const getDataGridColumns = (handleDeleteClick:any): GridColDef<IHostel>[] => [
@@ -75,18 +76,18 @@ function parseGridSortModel([model]: GridSortModel): IOrder | undefined {
     else return undefined;
 }
 
-function OmitActionFromLiteral<T extends Record<string | symbol, any>>(object: GridColDef<T>[]): (keyof T)[] {
-    // @ts-ignore
-    return object.reduce<keyof T>((acc, curr) => curr.field !== 'actions' ? [...acc, curr.field] : acc, []);
-}
 
 const notNeedValueOperators: Array<IOperatorMark> = ['isNotEmpty', 'isEmpty'];
 
 export const Tables: FC = () => {
-    const [paginationModel, setPageNumber] = useState<GridPaginationModel>({page: 0, pageSize: PAGE_LIMIT_DEFAULT});
-    const [orderModel, setOrderModel] = useState<GridSortModel>([]);
-    const [searchModel, setSearchModel] = useState<ISearch<keyof IHostel>>({field: "id", value: ""});
-    const [filterModel, setFilterModel] = useState<IFilter<keyof IHostel> | undefined>(undefined);
+    const paginationModelState = useState<GridPaginationModel>({page: 0, pageSize: PAGE_LIMIT_DEFAULT});
+    const [paginationModel, setPageNumber] = paginationModelState;
+    const orderModelState = useState<GridSortModel>([]);
+    const [orderModel, setOrderModel] = orderModelState;
+    const searchModelState = useState<ISearch<keyof IHostel>>({field: "id", value: ""});
+    const [searchModel, setSearchModel] = searchModelState;
+    const filterModelState = useState<IFilter<keyof IHostel> | undefined>(undefined);
+    const [filterModel, setFilterModel] = filterModelState;
 
     const [showAddForm, setShowAddForm] = useState<boolean>(false);
     const theme = useTheme()
@@ -110,10 +111,11 @@ export const Tables: FC = () => {
 
     const { register, handleSubmit } = useForm<Omit<IHostel, "id">>()
 
-    const [snackbar, setSnackbar] = useState<Pick<
+    const snackbarState = useState<Pick<
         AlertProps,
         'children' | 'severity'
     > | null>(null);
+    const [snackbar, setSnackbar] = snackbarState;
 
      const handleCloseSnackbar = () => setSnackbar(null);
 
@@ -151,7 +153,6 @@ export const Tables: FC = () => {
     }
 
     const onFilterChange = (model: GridFilterModel, details: GridCallbackDetails<"filter">) => {
-        console.log(model, details);
         if (details.reason && details.reason !== 'deleteFilterItem'){
             const filter = model.items[0];
             const operator = filter.operator as IOperatorMark;
@@ -218,6 +219,15 @@ export const Tables: FC = () => {
                 </FormControl>
             </Box>
             <div style={{height: "400px", marginTop: theme.spacing(2)}}>
+                <TablePage fieldsToAdd={(
+                    <>
+                    <TextField label="Имя" size="small" {...register('name')}/>
+                        <TextField label="ИНН" size="small" {...register('tin')}/>
+                        <TextField label="Адрес" size="small" {...register('address')}/>
+                    </>
+                )}>
+
+                </TablePage>
                 <DataGrid 
                     loading={!data && isGetHostelsLoading}
                     columns={columns} 
