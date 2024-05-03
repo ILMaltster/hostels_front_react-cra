@@ -62,7 +62,7 @@ export function TablePage (
     }
 
     const onChangeSearchSelect = (event: SelectChangeEvent) => {
-        const field = event.target.value;
+        const field = event.target.value as keyof TTableModels;
         setSearchModel(prev => ({...prev, field}))
     }
 
@@ -70,14 +70,15 @@ export function TablePage (
         setSearchModel(prev => ({...prev, value: event.target.value}))
     }
 
-    const columnsWithoutAction =  OmitActionFromLiteral(columns);
-
-    const handleCloseSnackbar = () => setSnackbar(null);
-
-    function OmitActionFromLiteral<T extends Record<string | symbol, any>>(object: GridColDef<T>[]): (keyof T)[] {
+    function omitActionFromLiteral<T extends Record<string | symbol, any>>(object: GridColDef<T>[]): (keyof T)[] {
         // @ts-ignore
         return object.reduce<keyof T>((acc, curr) => curr.field !== 'actions' ? [...acc, curr.field] : acc, []);
     }
+
+    const columnsWithoutAction =  omitActionFromLiteral<TTableModels>(columns);
+
+    const handleCloseSnackbar = () => setSnackbar(null);
+
 
     const onFilterChange = (model: GridFilterModel, details: GridCallbackDetails<"filter">) => {
         if (details.reason && details.reason !== 'deleteFilterItem'){
@@ -142,7 +143,7 @@ export function TablePage (
                             onChange={onChangeSearchSelect}
                         >
                             {
-                                columnsWithoutAction.map((field)=> (
+                                columnsWithoutAction.map((field) => (
                                     <MenuItem value={field}>{field}</MenuItem>
                                 ))
                             }

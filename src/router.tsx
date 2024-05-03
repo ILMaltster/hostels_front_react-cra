@@ -9,9 +9,12 @@ const Home: FC = () => <Navigate to={PATHS.root.tables.$path}/>
 
 export const rootRouter = createBrowserRouter([
     {
-        path: '/',
         element: <Layout/>,
         children: [
+            {
+                path: PATHS.root.$path,
+                element: <Home/>
+            },
             tablesRouter,
             reportsRouter,
             {
