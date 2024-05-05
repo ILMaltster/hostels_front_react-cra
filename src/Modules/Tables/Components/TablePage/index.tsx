@@ -4,7 +4,6 @@ import { GridInitialStateCommunity } from "@mui/x-data-grid/models/gridStateComm
 import { PAGE_LIMITS, PAGE_LIMIT_DEFAULT } from "Common/Consts";
 import { IFilter, IOperatorMark, IPaginationModel, ISearch } from "Common/Models";
 import { TTableModels } from "Modules/Tables/Models/general";
-import { IHostel } from "Modules/Tables/Models/hostels";
 import { FormEventHandler, ReactElement, useState } from "react";
 
 const tableInitialState: GridInitialStateCommunity = {
@@ -18,21 +17,23 @@ const tableInitialState: GridInitialStateCommunity = {
 const notNeedValueOperators: Array<IOperatorMark> = ['isNotEmpty', 'isEmpty'];
 
 interface ITablePageProps{
+    title: string;
     columns: GridColDef[];
     onSubmit: FormEventHandler<HTMLFormElement>;
-    searchModelState: [ISearch<keyof TTableModels>, React.Dispatch<React.SetStateAction<ISearch<keyof TTableModels>>>];
+    searchModelState: [ISearch, React.Dispatch<React.SetStateAction<ISearch>>];
     fieldsToAdd: ReactElement;
     dataTable?: IPaginationModel;
     isGetHostelsLoading: boolean;
     snackbarState: [Pick<AlertProps, "children" | "severity"> | null, React.Dispatch<React.SetStateAction<Pick<AlertProps, "children" | "severity"> | null>>];
     paginationModelState: [GridPaginationModel, React.Dispatch<React.SetStateAction<GridPaginationModel>>],
-    processRowUpdate: (updatedRow: TTableModels, originalRow: TTableModels) => TTableModels,
+    processRowUpdate: (updatedRow: Record<string, string | number>, originalRow: Record<string, string | number>) => Record<string, string | number>,
     orderModelState: [GridSortModel, React.Dispatch<React.SetStateAction<GridSortModel>>],
-    filterModelState: [IFilter<keyof TTableModels> | undefined, React.Dispatch<React.SetStateAction<IFilter<keyof TTableModels> | undefined>>]
+    filterModelState: [IFilter | undefined, React.Dispatch<React.SetStateAction<IFilter | undefined>>]
 }
 
 export function TablePage (
     { 
+        title,
         columns,
         onSubmit,
         searchModelState,
@@ -103,7 +104,7 @@ export function TablePage (
     return (
         <>
             <Typography variant="h2">
-                Hostels
+                {title}
             </Typography>
             {
                 showAddForm && (
@@ -127,7 +128,7 @@ export function TablePage (
                     <TextField 
                         id="table-search" 
                         label="Поиск" 
-                        value={searchModel} 
+                        value={searchModel.value} 
                         onChange={onChangeSearchText} 
                         size="small" 
                         type="search" 

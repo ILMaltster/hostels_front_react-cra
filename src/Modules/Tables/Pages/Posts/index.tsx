@@ -3,16 +3,16 @@ import { GridActionsCellItem, GridColDef, GridDeleteIcon, GridPaginationModel, G
 import { PAGE_LIMIT_DEFAULT } from "Common/Consts";
 import { IFilter, ISearch } from "Common/Models";
 import { TablePage } from "Modules/Tables/Components/TablePage";
-import { IHostel } from "Modules/Tables/Models/models";
-import { useAddHostel } from "Modules/Tables/Pages/Hostels/Utils/Queries/addHostel";
-import { useDeleteHostel } from "Modules/Tables/Pages/Hostels/Utils/Queries/deleteHostel";
-import { useEditHostel } from "Modules/Tables/Pages/Hostels/Utils/Queries/editHostel";
+import { IPost } from "Modules/Tables/Models/models";
 import { useGetHostels } from "Modules/Tables/Pages/Hostels/Utils/Queries/getHostels";
 import { parseGridSortModel } from "Modules/Tables/Utils/parseGridSortModel";
 import { FormEventHandler, useState } from "react";
 import { useForm } from "react-hook-form";
+import { useEditPost } from "./Utils/Queries/editPost";
+import { useDeletePost } from "./Utils/Queries/deletePost";
+import { useAddPost } from "./Utils/Queries/addPost";
 
-const getDataGridColumns = (handleDeleteClick:any): GridColDef<IHostel>[] => [
+const getDataGridColumns = (handleDeleteClick:any): GridColDef<IPost>[] => [
     { 
         field: 'id',
         headerName: 'id',   
@@ -28,20 +28,6 @@ const getDataGridColumns = (handleDeleteClick:any): GridColDef<IHostel>[] => [
         sortable: true,
     },
     { 
-        field: 'tin',
-        headerName: 'tin',   
-        editable: true,
-        flex: 0.3,
-        sortable: true,
-    },
-    { 
-        field: 'address',
-        headerName: 'address',  
-        editable: true,
-        flex: 0.3,
-        sortable: true,
-    },
-    { 
         field: 'actions',
         type: 'actions',
         headerName: 'actions',
@@ -49,12 +35,12 @@ const getDataGridColumns = (handleDeleteClick:any): GridColDef<IHostel>[] => [
         cellClassName: 'actions',
         getActions: ({ row }) => {    
             return [
-              <GridActionsCellItem
-                icon={<GridDeleteIcon />}
-                label="Delete"
-                onClick={()=>handleDeleteClick(row)}
-                color="inherit"
-              />,
+                <GridActionsCellItem
+                    icon={<GridDeleteIcon />}
+                    label="Delete"
+                    onClick={()=>handleDeleteClick(row)}
+                    color="inherit"
+                />,
             ];
           },
     },
@@ -67,10 +53,10 @@ export const HostelsTablePage = () => {
     const orderModelState = useState<GridSortModel>([]);
     const [orderModel] = orderModelState;
 
-    const searchModelState = useState<ISearch<keyof IHostel>>({field: "id", value: ""});
+    const searchModelState = useState<ISearch<keyof IPost>>({field: "id", value: ""});
     const [searchModel] = searchModelState;
 
-    const filterModelState = useState<IFilter<keyof IHostel> | undefined>(undefined);
+    const filterModelState = useState<IFilter<keyof IPost> | undefined>(undefined);
     const [filterModel] = filterModelState;
 
     const snackbarState = useState<Pick<
@@ -92,37 +78,35 @@ export const HostelsTablePage = () => {
     const onEditError = async () => { setSnackbar({ children: 'Не удалось изменить строку', severity: 'error' }); setForManualUpdateQuery((v)=>!v);};
     const onSuccesEdit = () => setSnackbar({ children: 'Строка успешно изменилась', severity: 'success' });
     
-    const {mutate: editHostel} = useEditHostel(onEditError, onSuccesEdit);
-    const {mutate: deleteHostel} = useDeleteHostel();
-    const {mutate: addHostel} = useAddHostel();
+    const {mutate: editHostel} = useEditPost(onEditError, onSuccesEdit);
+    const {mutate: deleteHostel} = useDeletePost();
+    const {mutate: addHostel} = useAddPost();
 
     const onSubmit: FormEventHandler<HTMLFormElement> = (e) => {
         e.preventDefault();
         handleSubmit((body) => addHostel(body))();
     }; 
 
-    const processRowUpdate = (updatedRow: IHostel, originalRow: IHostel) => {
-        editHostel({body: updatedRow, tin: originalRow.tin});
+    const processRowUpdate = (updatedRow: IPost, originalRow: IPost) => {
+        editHostel({body: updatedRow, id: originalRow.id});
         return updatedRow;
     };
 
-    const deleteHandler = (row: IHostel) => {
-        deleteHostel(row.tin);
+    const deleteHandler = (row: IPost) => {
+        deleteHostel(row.id);
     };
 
     const columns = getDataGridColumns(deleteHandler);
 
-    const { register, handleSubmit } = useForm<Omit<IHostel, "id">>()
+    const { register, handleSubmit } = useForm<Omit<IPost, "id">>()
 
     return (
         <TablePage 
-            title="Hostels"
+            title="Posts"
             columns={columns}
             fieldsToAdd={(
                 <>
-                    <TextField label="Имя" size="small" {...register('name')}/>
-                    <TextField label="ИНН" size="small" {...register('tin')}/>
-                    <TextField label="Адрес" size="small" {...register('address')}/>
+                    <TextField label="ИНН" size="small" {...register('name')}/>
                 </>
             )}
             filterModelState={filterModelState}

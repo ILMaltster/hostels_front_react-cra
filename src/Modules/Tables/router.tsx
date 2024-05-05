@@ -9,8 +9,12 @@ const IndexPage: FC = () => {console.log(1); return <Navigate to={PATHS.root.tab
 
 export const tablesRouter: RouteObject = {
     path: PATHS.root.tables.$path,
-    element: <Tables />,
+
     children: [
+        {
+            index: true,
+            element: <Tables />,
+        },
         hostelsTableRoute,
     ]
 }

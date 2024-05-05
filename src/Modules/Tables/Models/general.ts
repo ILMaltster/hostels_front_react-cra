@@ -1,3 +1,3 @@
-import { IHostel } from "./hostels";
+import { IHostel, IPost } from "./models";
 
-export type TTableModels = IHostel;
+export type TTableModels = IHostel | IPost;

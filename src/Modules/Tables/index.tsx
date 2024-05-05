@@ -1,6 +1,5 @@
 import { styled } from '@mui/material/styles';
 import { Box, Paper, Stack, Typography } from "@mui/material"
-import { Navigate } from 'react-router-dom';
 import { PATHS } from 'routePaths';
 import { Link } from 'react-router-dom';
 

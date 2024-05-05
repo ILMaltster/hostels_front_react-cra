@@ -1,7 +1,7 @@
 import { useMutation } from "@tanstack/react-query"
 import { queryClient } from "App"
 import { Api } from "Common/Utils/Api"
-import { IHostel } from "Modules/Tables/Models/hostels"
+import { IHostel } from "Modules/Tables/Models/models"
 
 interface IEditHostelProps {
     tin: string;
