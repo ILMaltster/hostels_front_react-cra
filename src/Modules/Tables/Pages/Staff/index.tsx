@@ -3,29 +3,53 @@ import { GridActionsCellItem, GridColDef, GridDeleteIcon, GridPaginationModel, G
 import { PAGE_LIMIT_DEFAULT } from "Common/Consts";
 import { IFilter, ISearch } from "Common/Models";
 import { TablePage } from "Modules/Tables/Components/TablePage";
-import { IPost } from "Modules/Tables/Models/models";
-import { useGetHostels } from "Modules/Tables/Pages/Hostels/Utils/Queries/getHostels";
+import { IStaff } from "Modules/Tables/Models/models";
 import { parseGridSortModel } from "Modules/Tables/Utils/parseGridSortModel";
 import { FormEventHandler, useState } from "react";
 import { useForm } from "react-hook-form";
-import { useEditPost } from "./Utils/Queries/editPost";
-import { useDeletePost } from "./Utils/Queries/deletePost";
-import { useAddPost } from "./Utils/Queries/addPost";
-import { useGetPosts } from "./Utils/Queries/getPosts";
+import { useGetStaff } from "./Utils/Queries/getStaff";
+import { useEditStaff } from "./Utils/Queries/editStaff";
+import { useDeleteStaff } from "./Utils/Queries/deleteStaff";
+import { useAddStaff } from "./Utils/Queries/addStaff";
 
-const getDataGridColumns = (handleDeleteClick:any): GridColDef<IPost>[] => [
+const getDataGridColumns = (handleDeleteClick:any): GridColDef<IStaff>[] => [
     { 
-        field: 'id',
-        headerName: 'id',   
+        field: 'hostel_id',
+        headerName: 'hostel_id',   
         type: 'number',
         width: 80,
         sortable: true,
     },
     { 
-        field: 'name',
-        headerName: 'name',    
+        field: 'first_name',
+        headerName: 'first_name',    
         editable: true,
         flex: 0.3,
+        sortable: true,
+    },
+    { 
+        field: 'second_name',
+        headerName: 'second_name',   
+        flex: 0.3,
+        sortable: true,
+    },
+    { 
+        field: 'third_name',
+        headerName: 'third_name',   
+        flex: 0.3,
+        sortable: true,
+    },
+    { 
+        field: 'tin',
+        headerName: 'tin',   
+        flex: 0.3,
+        sortable: true,
+    },
+    { 
+        field: 'post',
+        headerName: 'post',   
+        type: 'number',
+        width: 80,
         sortable: true,
     },
     { 
@@ -47,17 +71,17 @@ const getDataGridColumns = (handleDeleteClick:any): GridColDef<IPost>[] => [
     },
 ]
 
-export const PostsTablePage = () => {
+export const StaffTablePage = () => {
     const paginationModelState = useState<GridPaginationModel>({page: 0, pageSize: PAGE_LIMIT_DEFAULT});
     const [paginationModel] = paginationModelState;
 
     const orderModelState = useState<GridSortModel>([]);
     const [orderModel] = orderModelState;
 
-    const searchModelState = useState<ISearch<keyof IPost>>({field: "id", value: ""});
+    const searchModelState = useState<ISearch<keyof IStaff>>({field: "hostel_id", value: ""});
     const [searchModel] = searchModelState;
 
-    const filterModelState = useState<IFilter<keyof IPost> | undefined>(undefined);
+    const filterModelState = useState<IFilter<keyof IStaff> | undefined>(undefined);
     const [filterModel] = filterModelState;
 
     const snackbarState = useState<Pick<
@@ -67,7 +91,7 @@ export const PostsTablePage = () => {
     const [snackbar, setSnackbar] = snackbarState;
 
     const [forManualUpdateQuery, setForManualUpdateQuery] = useState<boolean>(true);
-    let { data, isLoading: isGetHostelsLoading } = useGetPosts({
+    let { data, isLoading: isGetHostelsLoading } = useGetStaff({
         limit: paginationModel.pageSize, 
         offset: paginationModel.pageSize * paginationModel.page, 
         order: parseGridSortModel(orderModel),
@@ -79,31 +103,31 @@ export const PostsTablePage = () => {
     const onEditError = async () => { setSnackbar({ children: 'Не удалось изменить строку', severity: 'error' }); setForManualUpdateQuery((v)=>!v);};
     const onSuccesEdit = () => setSnackbar({ children: 'Строка успешно изменилась', severity: 'success' });
     
-    const {mutate: editHostel} = useEditPost(onEditError, onSuccesEdit);
-    const {mutate: deleteHostel} = useDeletePost();
-    const {mutate: addHostel} = useAddPost();
+    const {mutate: editStaff} = useEditStaff(onEditError, onSuccesEdit);
+    const {mutate: deleteStaff} = useDeleteStaff();
+    const {mutate: addStaff} = useAddStaff();
 
     const onSubmit: FormEventHandler<HTMLFormElement> = (e) => {
         e.preventDefault();
-        handleSubmit((body) => addHostel(body))();
+        handleSubmit((body) => addStaff(body))();
     }; 
 
-    const processRowUpdate = (updatedRow: IPost, originalRow: IPost) => {
-        editHostel({body: updatedRow, id: originalRow.id});
+    const processRowUpdate = (updatedRow: IStaff, originalRow: IStaff) => {
+        editStaff({body: updatedRow, tin: originalRow.tin});
         return updatedRow;
     };
 
-    const deleteHandler = (row: IPost) => {
-        deleteHostel(row.id);
+    const deleteHandler = (row: IStaff) => {
+        deleteStaff(row.tin);
     };
 
     const columns = getDataGridColumns(deleteHandler);
 
-    const { register, handleSubmit } = useForm<Omit<IPost, "id">>()
+    const { register, handleSubmit } = useForm<Omit<IStaff, "id">>()
 
     return (
-        <TablePage 
-            title="Posts"
+        <TablePage<IStaff> 
+            title="Staff"
             columns={columns}
             fieldsToAdd={(
                 <>
@@ -119,6 +143,7 @@ export const PostsTablePage = () => {
             searchModelState={searchModelState}
             snackbarState={snackbarState}
             dataTable={data}
+            getRowId={(row) => row.hostel_id}
         />
     )
 }

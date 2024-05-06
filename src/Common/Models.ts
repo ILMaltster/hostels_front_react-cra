@@ -1,3 +1,5 @@
+import { TTableModels } from "Modules/Tables/Models/general";
+
 export interface IPaginationModel<T = any>{
     rows: T[];
     count: number;

@@ -1,5 +1,5 @@
 import { Alert, AlertProps, Box, Button, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent, Snackbar, TextField, Typography, useTheme } from "@mui/material"
-import { DataGrid, GridCallbackDetails, GridColDef, GridFilterModel, GridPaginationModel, GridSortModel } from "@mui/x-data-grid"
+import { DataGrid, GridCallbackDetails, GridColDef, GridFilterModel, GridPaginationModel, GridRowIdGetter, GridSortModel, GridValidRowModel } from "@mui/x-data-grid"
 import { GridInitialStateCommunity } from "@mui/x-data-grid/models/gridStateCommunity";
 import { PAGE_LIMITS, PAGE_LIMIT_DEFAULT } from "Common/Consts";
 import { IFilter, IOperatorMark, IPaginationModel, ISearch } from "Common/Models";
@@ -16,7 +16,7 @@ const tableInitialState: GridInitialStateCommunity = {
 
 const notNeedValueOperators: Array<IOperatorMark> = ['isNotEmpty', 'isEmpty'];
 
-interface ITablePageProps{
+interface ITablePageProps<T extends GridValidRowModel = GridValidRowModel>{
     title: string;
     columns: GridColDef[];
     onSubmit: FormEventHandler<HTMLFormElement>;
@@ -26,12 +26,13 @@ interface ITablePageProps{
     isGetHostelsLoading: boolean;
     snackbarState: [Pick<AlertProps, "children" | "severity"> | null, React.Dispatch<React.SetStateAction<Pick<AlertProps, "children" | "severity"> | null>>];
     paginationModelState: [GridPaginationModel, React.Dispatch<React.SetStateAction<GridPaginationModel>>],
-    processRowUpdate: (updatedRow: Record<string, string | number>, originalRow: Record<string, string | number>) => Record<string, string | number>,
+    processRowUpdate: (updatedRow: any, originalRow: any) => any,
     orderModelState: [GridSortModel, React.Dispatch<React.SetStateAction<GridSortModel>>],
-    filterModelState: [IFilter | undefined, React.Dispatch<React.SetStateAction<IFilter | undefined>>]
+    filterModelState: [IFilter | undefined, React.Dispatch<React.SetStateAction<IFilter | undefined>>],
+    getRowId?: GridRowIdGetter<T> | undefined
 }
 
-export function TablePage (
+export function TablePage<T extends GridValidRowModel = GridValidRowModel> (
     { 
         title,
         columns,
@@ -45,7 +46,8 @@ export function TablePage (
         processRowUpdate,
         orderModelState,
         filterModelState,
-    }: ITablePageProps) {
+        getRowId,
+    }: ITablePageProps<T>) {
     const [showAddForm, setShowAddForm] = useState<boolean>(false);
     const theme = useTheme()
     const [searchModel, setSearchModel] = searchModelState;
@@ -169,6 +171,7 @@ export function TablePage (
                     paginationModel={paginationModel}
                     filterMode="server"
                     onFilterModelChange={onFilterChange}
+                    getRowId={getRowId}
                 />
             </div>
             {!!snackbar && 

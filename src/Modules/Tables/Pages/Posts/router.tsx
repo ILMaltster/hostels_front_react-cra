@@ -1,8 +1,8 @@
 import { PATHS } from "routePaths";
-import { HostelsTablePage } from ".";
+import { PostsTablePage } from ".";
 import { RouteObject } from "react-router-dom";
 
-export const hostelsTableRoute: RouteObject = {
-    path: PATHS.root.tables.hostels.$path,
-    element: <HostelsTablePage />,
+export const postsTableRoute: RouteObject = {
+    path: PATHS.root.tables.posts.$path,
+    element: <PostsTablePage />,
 }

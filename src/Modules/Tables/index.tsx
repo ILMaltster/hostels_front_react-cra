@@ -23,11 +23,20 @@ export const Tables = () => {
                 display: 'flex',
                 justifyContent: 'center',
             }}>
-                <Stack>
+                <Stack spacing={2} sx={{minWidth: '300px'}}>
                     <Item>
                         <Link to={PATHS.root.tables.hostels.$path}>
                             <Typography>Таблицы HOSTELS</Typography>
-
+                        </Link>
+                    </Item>
+                    <Item>
+                        <Link to={PATHS.root.tables.posts.$path}>
+                            <Typography>Таблицы Posts</Typography>
+                        </Link>
+                    </Item>
+                    <Item>
+                        <Link to={PATHS.root.tables.staff.$path}>
+                            <Typography>Таблицы Staff</Typography>
                         </Link>
                     </Item>
                 </Stack>
