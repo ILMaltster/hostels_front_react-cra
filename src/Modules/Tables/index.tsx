@@ -39,6 +39,21 @@ export const Tables = () => {
                             <Typography>Таблицы Staff</Typography>
                         </Link>
                     </Item>
+                    <Item>
+                        <Link to={PATHS.root.tables.visitors.$path}>
+                            <Typography>Таблицы Visitors</Typography>
+                        </Link>
+                    </Item>
+                    <Item>
+                        <Link to={PATHS.root.tables.hotelRooms.$path}>
+                            <Typography>Таблицы HotelRooms</Typography>
+                        </Link>
+                    </Item>
+                    <Item>
+                        <Link to={PATHS.root.tables.bookings.$path}>
+                            <Typography>Таблицы Bookings</Typography>
+                        </Link>
+                    </Item>
                 </Stack>
             </Box>
         </Box>

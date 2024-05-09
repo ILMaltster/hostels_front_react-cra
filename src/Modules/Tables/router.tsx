@@ -5,6 +5,9 @@ import { FC } from "react";
 import { Tables } from ".";
 import { postsTableRoute } from "./Pages/Posts/router";
 import { staffTableRoute } from "./Pages/Staff/router";
+import { visitorsTableRoute } from "./Pages/Visitors/router";
+import { hotelRoomsTableRoute } from "./Pages/Hotel-rooms/router";
+import { bookingsTableRoute } from "./Pages/Bookings/router";
 
 const IndexPage: FC = () => {console.log(1); return <Navigate to={PATHS.root.tables.hostels.$path}/>}
 
@@ -20,5 +23,8 @@ export const tablesRouter: RouteObject = {
         hostelsTableRoute,
         postsTableRoute,
         staffTableRoute,
+        visitorsTableRoute,
+        hotelRoomsTableRoute,
+        bookingsTableRoute,
     ]
 }

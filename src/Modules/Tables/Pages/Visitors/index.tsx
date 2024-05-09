@@ -3,58 +3,63 @@ import { GridActionsCellItem, GridColDef, GridDeleteIcon, GridPaginationModel, G
 import { PAGE_LIMIT_DEFAULT } from "Common/Consts";
 import { IFilter, ISearch } from "Common/Models";
 import { TablePage } from "Modules/Tables/Components/TablePage";
-import { IStaff } from "Modules/Tables/Models/models";
+import { IStaff, IVisitor } from "Modules/Tables/Models/models";
 import { parseGridSortModel } from "Modules/Tables/Utils/parseGridSortModel";
 import { FormEventHandler, useState } from "react";
 import { useForm } from "react-hook-form";
-import { useGetStaff } from "./Utils/Queries/getStaff";
-import { useEditStaff } from "./Utils/Queries/editStaff";
-import { useDeleteStaff } from "./Utils/Queries/deleteStaff";
-import { useAddStaff } from "./Utils/Queries/addStaff";
+import { useGetVisitors } from "./Utils/Queries/getStaff";
+import { useEditVisitor } from "./Utils/Queries/editStaff";
+import { useDeleteVisitor } from "./Utils/Queries/deleteStaff";
+import { useAddVisitor } from "./Utils/Queries/addStaff";
 
-const getDataGridColumns = (handleDeleteClick:any): GridColDef<IStaff>[] => [
+const getDataGridColumns = (handleDeleteClick:any): GridColDef<IVisitor>[] => [
     { 
-        field: 'hostel_id',
-        headerName: 'hostel_id',
-        editable: true,
+        field: 'id',
+        headerName: 'id',   
         type: 'number',
         width: 80,
         sortable: true,
     },
     { 
-        field: 'first_name',
-        headerName: 'first_name',    
+        field: 'additional_info',
+        headerName: 'additional_info',    
         editable: true,
+        flex: 0.3,
+        sortable: true,
+    },
+    { 
+        field: 'rating',
+        headerName: 'rating',   
+        editable: true,
+        flex: 0.3,
+        sortable: true,
+    },
+    { 
+        field: 'phone',
+        headerName: 'phone',   
+        editable: true,
+        flex: 0.3,
+        sortable: true,
+    },
+    { 
+        field: 'first_name',
+        headerName: 'first_name',
+        editable: true,   
         flex: 0.3,
         sortable: true,
     },
     { 
         field: 'second_name',
-        headerName: 'second_name',   
-        editable: true,
+        headerName: 'second_name',  
+        editable: true, 
         flex: 0.3,
         sortable: true,
     },
     { 
         field: 'third_name',
-        headerName: 'third_name',   
-        editable: true,
+        headerName: 'third_name', 
+        editable: true,  
         flex: 0.3,
-        sortable: true,
-    },
-    { 
-        field: 'tin',
-        headerName: 'tin',  
-        editable: true, 
-        flex: 0.3,
-        sortable: true,
-    },
-    { 
-        field: 'post',
-        headerName: 'post',  
-        editable: true, 
-        type: 'number',
-        width: 80,
         sortable: true,
     },
     { 
@@ -76,17 +81,17 @@ const getDataGridColumns = (handleDeleteClick:any): GridColDef<IStaff>[] => [
     },
 ]
 
-export const StaffTablePage = () => {
+export const VisitorsTablePage = () => {
     const paginationModelState = useState<GridPaginationModel>({page: 0, pageSize: PAGE_LIMIT_DEFAULT});
     const [paginationModel] = paginationModelState;
 
     const orderModelState = useState<GridSortModel>([]);
     const [orderModel] = orderModelState;
 
-    const searchModelState = useState<ISearch<keyof IStaff>>({field: "hostel_id", value: ""});
+    const searchModelState = useState<ISearch<keyof IVisitor>>({field: "id", value: ""});
     const [searchModel] = searchModelState;
 
-    const filterModelState = useState<IFilter<keyof IStaff> | undefined>(undefined);
+    const filterModelState = useState<IFilter<keyof IVisitor> | undefined>(undefined);
     const [filterModel] = filterModelState;
 
     const snackbarState = useState<Pick<
@@ -96,7 +101,7 @@ export const StaffTablePage = () => {
     const [snackbar, setSnackbar] = snackbarState;
 
     const [forManualUpdateQuery, setForManualUpdateQuery] = useState<boolean>(true);
-    let { data, isLoading: isGetHostelsLoading } = useGetStaff({
+    let { data, isLoading: isGetHostelsLoading } = useGetVisitors({
         limit: paginationModel.pageSize, 
         offset: paginationModel.pageSize * paginationModel.page, 
         order: parseGridSortModel(orderModel),
@@ -108,35 +113,40 @@ export const StaffTablePage = () => {
     const onEditError = async () => { setSnackbar({ children: 'Не удалось изменить строку', severity: 'error' }); setForManualUpdateQuery((v)=>!v);};
     const onSuccesEdit = () => setSnackbar({ children: 'Строка успешно изменилась', severity: 'success' });
     
-    const {mutate: editStaff} = useEditStaff(onEditError, onSuccesEdit);
-    const {mutate: deleteStaff} = useDeleteStaff();
-    const {mutate: addStaff} = useAddStaff();
+    const {mutate: editVisitor} = useEditVisitor(onEditError, onSuccesEdit);
+    const {mutate: deleteVisitor} = useDeleteVisitor();
+    const {mutate: addVisitor} = useAddVisitor();
 
     const onSubmit: FormEventHandler<HTMLFormElement> = (e) => {
         e.preventDefault();
-        handleSubmit((body) => addStaff(body))();
+        handleSubmit((body) => addVisitor(body))();
     }; 
 
-    const processRowUpdate = (updatedRow: IStaff, originalRow: IStaff) => {
-        editStaff({body: updatedRow, tin: originalRow.tin});
+    const processRowUpdate = (updatedRow: IVisitor, originalRow: IVisitor) => {
+        editVisitor({body: updatedRow, id: originalRow.id});
         return updatedRow;
     };
 
-    const deleteHandler = (row: IStaff) => {
-        deleteStaff(row.tin);
+    const deleteHandler = (row: IVisitor) => {
+        deleteVisitor(row.id);
     };
 
     const columns = getDataGridColumns(deleteHandler);
 
-    const { register, handleSubmit } = useForm<Omit<IStaff, "id">>()
+    const { register, handleSubmit } = useForm<Omit<IVisitor, "id">>()
 
     return (
-        <TablePage<IStaff> 
-            title="Staff"
+        <TablePage<IVisitor> 
+            title="Visitors"
             columns={columns}
             fieldsToAdd={(
                 <>
-                    <TextField label="Наименование должности" size="small" {...register('name')}/>
+                    <TextField label="Имя" size="small" {...register('first_name')}/>
+                    <TextField label="Фамилия" size="small" {...register('second_name')}/>
+                    <TextField label="Отчество" size="small" {...register('third_name')}/>
+                    <TextField label="Номер телефона" size="small" {...register('phone')}/>
+                    <TextField label="Рейтинг" size="small" {...register('rating')}/>
+                    <TextField label="Доп. информация" size="small" {...register('additional_info')}/>
                 </>
             )}
             filterModelState={filterModelState}
@@ -148,7 +158,6 @@ export const StaffTablePage = () => {
             searchModelState={searchModelState}
             snackbarState={snackbarState}
             dataTable={data}
-            getRowId={(row) => row.hostel_id}
         />
     )
 }

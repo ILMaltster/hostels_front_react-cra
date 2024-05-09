@@ -11,8 +11,8 @@ export const PATHS = {
             posts: {
                 $path: 'posts',
             },
-            bookins: {
-                $path: 'bookins',
+            bookings: {
+                $path: 'bookings',
             },
             historyVisitorsData: {
                 $path: 'historyVisitorsData',
@@ -31,7 +31,15 @@ export const PATHS = {
             $path: '/home'
         },
         reports: {
-            $path: '/reports'
+            $path: '/reports',
+
+            frequentCustomer: {
+                $path: 'frequentCustomer'
+            },
+
+            profitableRooms:{
+                $path: 'profitableRooms'
+            }
         }
     },
 }
