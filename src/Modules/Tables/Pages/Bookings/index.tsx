@@ -137,17 +137,20 @@ export const BookingsTablePage = () => {
 
     const columns = getDataGridColumns(deleteHandler);
 
-    const { register, handleSubmit } = useForm<IBooking>()
+    const { register, handleSubmit } = useForm<IBooking>({defaultValues: {
+        arrival_date: new Date().toISOString().substr(0, 10), 
+        departure_date: new Date().toISOString().substr(0, 10)
+    }})
 
     return (
         <TablePage<IBooking> 
-            title="Hotel rooms"
+            title="Booking"
             columns={columns}
             fieldsToAdd={(
                 <>
                     <TextField label="Комната" size="small" {...register('hotel_room_id')}/>
                     <TextField label="Отель" size="small" {...register('hotel_id')}/>
-                    <TextField type="date" label="Дата прибытия" {...register('arrival_date')}/>
+                    <TextField type="date" label="Дата прибытия" size="small" {...register('arrival_date')}/>
                     <TextField type="date" label="Дата отбытия" size="small" {...register('departure_date')}/>
                     <TextField label="Посетитель" size="small" {...register('visitor_id')}/>
                 </>
@@ -161,7 +164,6 @@ export const BookingsTablePage = () => {
             searchModelState={searchModelState}
             snackbarState={snackbarState}
             dataTable={data}
-            getRowId={(row) => row.hotel_id}
         />
     )
 }

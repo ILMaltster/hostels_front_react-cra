@@ -136,7 +136,12 @@ export const StaffTablePage = () => {
             columns={columns}
             fieldsToAdd={(
                 <>
-                    <TextField label="Наименование должности" size="small" {...register('name')}/>
+                    <TextField label="Отель" size="small" {...register('hostel_id')}/>
+                    <TextField label="Имя" size="small" {...register('first_name')}/>
+                    <TextField label="Фамилия" size="small" {...register('second_name')}/>
+                    <TextField label="Отчество" size="small" {...register('third_name')}/>
+                    <TextField label="Инн" size="small" {...register('tin')}/>
+                    <TextField label="Должность" size="small" {...register('post')}/>
                 </>
             )}
             filterModelState={filterModelState}
@@ -148,7 +153,7 @@ export const StaffTablePage = () => {
             searchModelState={searchModelState}
             snackbarState={snackbarState}
             dataTable={data}
-            getRowId={(row) => row.hostel_id}
+            getRowId={(row) => row.tin}
         />
     )
 }

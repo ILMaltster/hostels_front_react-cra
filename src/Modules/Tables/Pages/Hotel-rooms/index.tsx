@@ -1,4 +1,4 @@
-import { AlertProps, TextField } from "@mui/material";
+import { AlertProps, Checkbox, FormControlLabel, TextField } from "@mui/material";
 import { GridActionsCellItem, GridColDef, GridDeleteIcon, GridPaginationModel, GridSortModel } from "@mui/x-data-grid";
 import { PAGE_LIMIT_DEFAULT } from "Common/Consts";
 import { IFilter, ISearch } from "Common/Models";
@@ -146,7 +146,7 @@ export const HotelRoomsTablePage = () => {
                     <TextField label="Описание" size="small" {...register('description')}/>
                     <TextField label="Вместимость" size="small" {...register('capacity')}/>
                     <TextField label="Цена за сутки" size="small" {...register('price_per_day')}/>
-                    <TextField label="Доступность" size="small" {...register('active')}/>
+                    <FormControlLabel label="Доступность"  control={<Checkbox size="small"/>}  {...register('active')}/>
                 </>
             )}
             filterModelState={filterModelState}
@@ -158,7 +158,7 @@ export const HotelRoomsTablePage = () => {
             searchModelState={searchModelState}
             snackbarState={snackbarState}
             dataTable={data}
-            getRowId={(row) => row.hotel_id}
+            getRowId={(row) => `${row.hotel_id}-${row.hotel_room_number}`}
         />
     )
 }

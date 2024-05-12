@@ -13,6 +13,7 @@ export interface IPost {
 export interface IStaff {
     hostel_id: number,
     name: string,
+    first_name: string,
     second_name: string,
     third_name: string,
     tin: string,
@@ -34,7 +35,7 @@ export interface IHotelRoom {
     hotel_id: number;    
     description: string;    
     capacity: number;    
-    price_per_day: number;    
+    price_per_day: string;    
     active: boolean;
 }
 
