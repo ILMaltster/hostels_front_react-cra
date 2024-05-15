@@ -4,7 +4,6 @@ import { AppBar, Box, Button, Toolbar, Typography, useTheme } from "@mui/materia
 import { PATHS } from "../../routePaths"
 
 const pages = [
-    {title: 'Домой', path: PATHS.root.home.$path}, 
     {title: 'Таблицы', path: PATHS.root.tables.$path}, 
     {title: 'Отчеты', path: PATHS.root.reports.$path}
 ]
